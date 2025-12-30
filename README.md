@@ -1,36 +1,118 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Project Admin Dashboard (Next.js)
 
-## Getting Started
+## Overview
 
-First, run the development server:
+This project is a small admin dashboard built with **Next.js (App
+Router)** and **TypeScript** to manage hierarchical data structures:
+**Projects → Tasks → Subtasks**.\
+It demonstrates nested state management, cascading updates, and basic
+CRUD operations using local state (no backend).
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+The focus of this exercise is **code structure, state management, and
+handling complexity**, rather than visual polish.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+------------------------------------------------------------------------
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Architecture
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The application follows a simple and intentional architecture:
 
-## Learn More
+-   **App Router (`app/page.tsx`)**\
+    Used as the main dashboard entry point to keep routing minimal and
+    focused.
+-   **Component-based UI structure**\
+    Projects, tasks, and subtasks are rendered as nested components to
+    reflect the data hierarchy clearly.
+-   **Single global store**\
+    All project-related state and logic live in one Zustand store to
+    keep business logic centralized and easy to reason about.
 
-To learn more about Next.js, take a look at the following resources:
+This structure makes the data flow predictable and avoids unnecessary
+abstraction for a small-to-medium sized application.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+------------------------------------------------------------------------
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## State Management Choice
 
-## Deploy on Vercel
+I chose **Zustand** for state management because:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+-   It provides a **minimal API** with very low boilerplate.
+-   State updates are **explicit and easy to trace**, especially for
+    nested data.
+-   It avoids the complexity of reducers or excessive context providers.
+-   It scales well for local-only state without introducing unnecessary
+    dependencies.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+All CRUD operations and cascading status logic are handled inside the
+store.\
+This keeps UI components mostly declarative and focused on rendering.
+
+------------------------------------------------------------------------
+
+## Cascading Status Logic
+
+Status updates are designed to cascade upward:
+
+-   **Subtask updates** can affect the parent task's status.
+-   **Task updates** can affect the project's status.
+-   A parent is marked:
+    -   `completed` when all children are completed
+    -   `in-progress` when at least one child is active
+    -   `pending` when empty or not yet started
+
+This logic is centralized in the store to ensure consistency and avoid
+duplicated checks across components.
+
+------------------------------------------------------------------------
+
+## Performance Considerations
+
+Although the dataset is small, the following considerations were
+applied:
+
+-   **Immutable updates** using array mapping to ensure predictable
+    re-renders.
+-   **Scoped updates** to only the affected project/task/subtask.
+-   Zustand's selector-based updates prevent unnecessary re-renders of
+    unrelated components.
+-   UI components are kept lightweight and free of heavy computations.
+
+For larger datasets, memoization and list virtualization would be
+considered.
+
+------------------------------------------------------------------------
+
+## Styling Approach
+
+-   Basic styling was implemented using **shadcn/ui** and utility-first
+    CSS.
+-   Status indicators use color coding to clearly differentiate:
+    -   Pending
+    -   In Progress
+    -   Completed
+
+The styling is intentionally simple to keep the focus on logic and
+structure.
+
+------------------------------------------------------------------------
+
+## What I Would Improve With More Time
+
+With additional time, I would:
+
+-   Add **inline editing** for titles and descriptions.
+-   Introduce **optimistic UI patterns** for better UX.
+-   Split the store into smaller slices if the domain grows.
+-   Add **unit tests** for cascading status logic.
+-   Implement accessibility improvements and keyboard navigation.
+-   Persist state using local storage or a backend API.
+
+------------------------------------------------------------------------
+
+## Conclusion
+
+This project demonstrates a clear approach to handling nested data,
+state updates, and UI interaction in a modern React/Next.js
+application.\
+The emphasis is on maintainability, clarity, and correctness rather than
+feature overload.
